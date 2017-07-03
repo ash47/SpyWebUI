@@ -1,0 +1,23 @@
+{
+  "name": "spyweb_ui",
+  "version": "1.0.0",
+  "description": "A UI to help play spyweb.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ash47/SpyWebUI.git"
+  },
+  "author": "Ash47",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ash47/SpyWebUI/issues"
+  },
+  "homepage": "https://github.com/ash47/SpyWebUI#readme",
+  "dependencies": {
+    "express": "^4.15.3"
+  }
+}
