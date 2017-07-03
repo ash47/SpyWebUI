@@ -6,6 +6,7 @@
 	<title>SpyWeb UI</title>
 	<script src="/js/jquery-3.2.1.min.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/clipboard.js"></script>
 	<script src="/js/data.js"></script>
 	<script src="/js/app.js"></script>
 
@@ -43,10 +44,14 @@
 
 		<div id="enemyBoard">
 			<div id="enemyMainBoard"></div>
+			<div id="clueDisplay">
+				<h3>Clues</h3>
+				<div id="clueStorage"></div>
+			</div>
 		</div>
 	</div>
 
-	<div class="modal fade" id="myModal" role="dialog">
+	<div class="modal" id="myModal" role="dialog">
     <div class="modal-dialog">
 
       <!-- Modal content-->

@@ -68,11 +68,11 @@ $(document).ready(function() {
 
 		// Add my board
 		addEmptyBoard($('#myMainBoard'), myTeam);
-		addEmptyBoard($('#enemyMainBoard'), enemyTeam);
+		addEmptyBoard($('#enemyMainBoard'), enemyTeam, $('#clueStorage'));
 	}
 
 	// Adds an empty board that can be filled out
-	function addEmptyBoard(container, team) {
+	function addEmptyBoard(container, team, clueStorage) {
 		var subContainer = $('<div>', {
 			class: 'mainBoard'
 		}).appendTo(container);
@@ -101,9 +101,30 @@ $(document).ready(function() {
 		$('<div>', {
 			class: 'slot slotBoat'
 		}).appendTo(subContainer);
+
+		// Storate for clues
+		if(clueStorage != null) {
+			var knownClues = {};
+
+			// Loop over all characters
+			for(var characterName in window.characterData) {
+				var characterInfo = window.characterData[characterName];
+
+				if(characterInfo.team == 'good' && team != teamGreen) continue;
+				if(characterInfo.team == 'bad' && team != teamRed) continue;
+
+				var thisDiv = $('<div>', {
+					class: 'agentSelect',
+					agentName: characterName
+				}).appendTo(clueStorage);
+
+				// Add the agent into the slot
+				agentIntoSlot(thisDiv, characterName);
+			}
+		}
 	}
 
-	function addSlotContainer(container, slotNumber, team, boardStorage) {
+	function addSlotContainer(container, slotNumber, team, boardStorage, advancedMessage) {
 		var squareWidth = 120;
 
 		var xPos = slotNumber % 3 * squareWidth;
@@ -122,7 +143,17 @@ $(document).ready(function() {
 
 		// Make this an agent select screen
 		theDiv.click(function() {
-			showAgentSelect(team, boardStorage[slotNumber], boardStorage, function(selectedAgent) {
+			var textMessage = 'Nothing';
+
+			if(boardStorage[slotNumber] != null) {
+				textMessage = boardStorage[slotNumber];
+			}
+
+			if(advancedMessage != null) {
+				textMessage = advancedMessage;
+			}
+
+			showAgentSelect(team, boardStorage[slotNumber], boardStorage, textMessage, function(selectedAgent) {
 				// Store it
 				boardStorage[slotNumber] = selectedAgent;
 
@@ -132,10 +163,36 @@ $(document).ready(function() {
 		});
 	}
 
-	function showAgentSelect(team, selectedAgent, boardStorage, callback) {
+	function showAgentSelect(team, selectedAgent, boardStorage, textMessage, callback) {
 		$('#modalHeader').text('Select Agent');
 		var modalBody = $('#modalBody');
 		modalBody.empty();
+
+		// Do we need to add a text message?
+		if(textMessage != null) {
+			var sectionContiner = $('<div>', {
+				class: 'messageContainer'
+			}).appendTo(modalBody);
+
+			$('<input>', {
+				class: 'form-control clipboardTemp',
+				val: textMessage,
+				disabled: true,
+				'data-clipboard-text': textMessage
+			}).appendTo(sectionContiner);
+
+			$('<button>', {
+				class: 'btn btn-primary clipboardTemp',
+				text: 'Copy',
+				'data-clipboard-text': textMessage
+			}).appendTo(sectionContiner);
+
+			$('<br>').appendTo(modalBody);
+
+			new Clipboard('.clipboardTemp', {
+				container: document.getElementById('myModal')
+			});
+		}
 
 		// List of taken agents
 		var takenAgents = {};
@@ -260,4 +317,5 @@ $(document).ready(function() {
 	setMyTeam(teamGreen);
 	setEnemyTeam(teamRed);
 	startMatch();
+	setTab(tabEnemyBoard);
 });
