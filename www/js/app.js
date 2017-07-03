@@ -106,23 +106,112 @@ $(document).ready(function() {
 		if(clueStorage != null) {
 			var knownClues = {};
 
-			// Loop over all characters
-			for(var characterName in window.characterData) {
-				var characterInfo = window.characterData[characterName];
+			var rebuildClueDisplay = function() {
+				// Empty out the clue storage
+				clueStorage.empty();
 
-				if(characterInfo.team == 'good' && team != teamGreen) continue;
-				if(characterInfo.team == 'bad' && team != teamRed) continue;
+				var handledClues = {};
 
-				var thisDiv = $('<div>', {
-					class: 'agentSelect',
-					agentName: characterName
-				}).appendTo(clueStorage);
+				// Loop over all characters
+				for(var characterName in window.characterData) {
+					var characterInfo = window.characterData[characterName];
 
-				// Add the agent into the slot
-				agentIntoSlot(thisDiv, characterName);
+					// Ensure this character is on the right team
+					if(characterInfo.team == 'good' && team != teamGreen) continue;
+					if(characterInfo.team == 'bad' && team != teamRed) continue;
+
+					// Did we already handle this character?
+					if(handledClues[characterName]) continue;
+
+					// This agent is now handled
+					handledClues[characterName] = true;
+
+					// Add's a cluegrid for the given character
+					addClueGrid(characterName, clueStorage, team);
+				}
 			}
+
+			// Do the initial rebuild
+			rebuildClueDisplay();
 		}
 	}
+
+	// Adds a clue storage
+	function addClueGrid(characterName, clueStorage, team) {
+		var characterInfo = window.characterData[characterName];
+		var moves = characterInfo.moves;
+
+		var width = 1;
+		var height = 1;
+		var xPos = 0;
+		var yPos = 0;
+
+		var agentWidth = 120;
+		var agentHeight = 120;
+
+		if(moves.left) {
+			++width;
+			++xPos;
+		}
+		if(moves.right) ++width;
+		if(moves.up) {
+			++height;
+			++yPos;
+		}
+		if(moves.down) ++height;
+
+		var theWidth = width * agentWidth;
+		var theHeight = height * agentHeight;
+		var myClueStorage = $('<div>', {
+			class: 'clueStorage',
+			style: 'width: ' + theWidth + 'px; height: ' + theHeight + 'px;'
+		}).appendTo(clueStorage);
+
+		var thisDiv = $('<div>', {
+			class: 'agentSelect clueAgent',
+			agentName: characterName,
+			style: 'left: ' + xPos * agentWidth + 'px; top: ' + yPos * agentHeight + 'px;'
+		}).appendTo(myClueStorage);
+
+		// Add the agent into the slot
+		agentIntoSlot(thisDiv, characterName);
+
+		// Add all the known/unknown moves
+		for(var moveDirection in moves) {
+			// Default to the middle
+			var myX = xPos;
+			var myY = yPos;
+
+			if(moveDirection == 'left') --myX;
+			if(moveDirection == 'right') ++myX;
+			if(moveDirection == 'up') --myY;
+			if(moveDirection == 'down') ++myY;
+
+			var thisAgent = 'unknown';
+
+			var moveSlot = $('<div>', {
+				class: 'agentSelect clueAgent',
+				agentName: thisAgent,
+				style: 'left: ' + myX * agentWidth + 'px; top: ' + myY * agentHeight + 'px;',
+				click: function() {
+					var myBoardStorage = {
+						[characterName]: true
+					};
+
+					// Build the question
+					var textMessage = 'Who is ' + characterName + ' ' + moves[moveDirection] + 'ing ' + moveDirection + ' at?';
+
+					// Show the selector
+					showAgentSelect(team, null, myBoardStorage, textMessage, function(selectedAgent) {
+						
+					});
+				}
+			}).appendTo(myClueStorage);
+
+			// Add the agent into the slot
+			agentIntoSlot(moveSlot, thisAgent);
+		}
+	};
 
 	function addSlotContainer(container, slotNumber, team, boardStorage, advancedMessage) {
 		var squareWidth = 120;
